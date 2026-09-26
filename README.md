@@ -1,4 +1,4 @@
-# Escale Seu Time
+# Escale Seu Time.
 
 Mobile-first PWA (React + Vite + Tailwind v4) to build a football lineup: pick the squad, place 11 players on the pitch, manage the bench, make substitutions and export the lineup as an image.
 

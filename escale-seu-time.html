@@ -1,0 +1,687 @@
+<title>Escale Seu Time</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Barlow+Condensed:wght@500;600;700;800&display=swap">
+<style>
+  :root{
+    color-scheme: dark;
+    --board:#173829;
+    --board-dark:#0d2318;
+    --chalk:#f4f1e6;
+    --chalk-dim:rgba(244,241,230,.62);
+    --line:rgba(244,241,230,.55);
+    --amber:#ffb703;
+    --amber-ink:#3a2600;
+    --ink:#0d2016;
+    --pitch-a:#1f5138;
+    --pitch-b:#1a4630;
+    --danger:#ff8a65;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 700px at 50% -10%, #1f4a34 0%, var(--board) 55%, var(--board-dark) 100%);
+    color:var(--chalk);
+    font-family:"Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+    display:flex;
+    justify-content:center;
+    padding-inline:16px;
+  }
+  .wrap{
+    width:100%;
+    max-width:480px;
+    padding-block:24px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  /* ---------- header ---------- */
+  .header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .crest{
+    flex:none;
+    width:52px;height:52px;
+    border-radius:50% 50% 50% 4px;
+    background:linear-gradient(155deg, var(--amber), #ff8f1f);
+    display:flex;align-items:center;justify-content:center;
+    font:800 20px/1 "Barlow Condensed";
+    color:var(--amber-ink);
+    box-shadow: var(--shadow), inset 0 0 0 3px rgba(13,32,22,.35);
+    transform:rotate(-4deg);
+    user-select:none;
+  }
+  .title-block{flex:1;min-width:0;}
+  .eyebrow{
+    font:700 12px/1 "Barlow Condensed";
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 2px;
+  }
+  #teamName{
+    width:100%;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--chalk);
+    font-family:"Permanent Marker", cursive;
+    font-size:clamp(22px,7vw,30px);
+    line-height:1.15;
+    padding:2px 0;
+    border-bottom:2px dashed transparent;
+  }
+  #teamName:focus{border-bottom-color:var(--line);}
+  #teamName::placeholder{color:var(--chalk-dim);}
+
+  /* ---------- formation pills ---------- */
+  .formations{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-block:2px 4px;
+    scrollbar-width:none;
+  }
+  .formations::-webkit-scrollbar{display:none;}
+  .f-pill{
+    flex:none;
+    border:1.5px solid var(--line);
+    background:rgba(244,241,230,.06);
+    color:var(--chalk);
+    font:700 15px/1 "Barlow Condensed";
+    letter-spacing:.03em;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:transform .12s ease, background .12s ease, color .12s ease;
+  }
+  .f-pill:hover{background:rgba(244,241,230,.12);}
+  .f-pill:active{transform:scale(.96);}
+  .f-pill[aria-pressed="true"]{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:var(--amber-ink);
+  }
+
+  /* ---------- progress ---------- */
+  .progress-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .progress-track{
+    flex:1;
+    height:6px;
+    border-radius:999px;
+    background:rgba(244,241,230,.14);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--amber), #ffd166);
+    border-radius:999px;
+    transition:width .25s ease;
+  }
+  .progress-label{
+    font:700 14px/1 "Barlow Condensed";
+    color:var(--chalk-dim);
+    white-space:nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- field ---------- */
+  .field-wrap{
+    container-type: inline-size;
+    position:relative;
+    width:100%;
+    aspect-ratio: 100 / 145;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow: var(--shadow);
+    background:
+      repeating-linear-gradient(
+        180deg,
+        var(--pitch-a) 0 9.6667%,
+        var(--pitch-b) 9.6667% 19.3334%
+      );
+  }
+  .field-wrap svg{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    display:block;
+  }
+  .field-lines{
+    fill:none;
+    stroke:var(--line);
+    stroke-width:.5;
+    vector-effect:non-scaling-stroke;
+  }
+  .field-dot{fill:var(--line);}
+
+  .slot{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4cqw;
+    width:24cqw;
+  }
+  .jersey{
+    width:13.5cqw;
+    height:13.5cqw;
+    min-width:30px;min-height:30px;
+    border-radius:50%;
+    background:var(--amber);
+    border:2px solid var(--ink);
+    box-shadow:0 2px 0 rgba(0,0,0,.35), inset 0 -3px 0 rgba(0,0,0,.15);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--amber-ink);
+    font:800 4.6cqw/1 "Barlow Condensed";
+    letter-spacing:.02em;
+    user-select:none;
+  }
+  .jersey span{font-size:clamp(10px, 4.6cqw, 15px);}
+  .name-tape{
+    width:100%;
+    text-align:center;
+    background:var(--chalk);
+    color:var(--ink);
+    border:none;
+    outline:none;
+    border-radius:3px;
+    padding:3px 2px;
+    font:700 3.7cqw/1.1 "Barlow Condensed";
+    font-size:clamp(9px, 3.7cqw, 13px);
+    text-transform:uppercase;
+    letter-spacing:.01em;
+    box-shadow:0 2px 0 rgba(0,0,0,.25);
+    transform:rotate(-1.1deg);
+  }
+  .name-tape::placeholder{color:#8a8577; text-transform:none; font-weight:600;}
+  .name-tape:focus{outline:2px solid var(--amber); outline-offset:1px;}
+
+  /* ---------- actions ---------- */
+  .actions{
+    display:flex;
+    gap:10px;
+  }
+  .btn{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:rgba(244,241,230,.06);
+    color:var(--chalk);
+    font:700 16px/1 "Barlow Condensed";
+    letter-spacing:.02em;
+    padding:12px 10px;
+    cursor:pointer;
+  }
+  .btn:hover{background:rgba(244,241,230,.12);}
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{
+    background:var(--amber);
+    border-color:var(--amber);
+    color:var(--amber-ink);
+  }
+  .btn.primary:hover{background:#ffc233;}
+  .btn svg{width:18px;height:18px;flex:none;}
+
+  .hint{
+    text-align:center;
+    color:var(--chalk-dim);
+    font:600 13px/1.5 "Barlow Condensed";
+    letter-spacing:.02em;
+  }
+
+  /* ---------- modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;
+    background:rgba(6,14,10,.82);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    z-index:10;
+  }
+  .modal{
+    width:100%;max-width:420px;
+    background:var(--board-dark);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    box-shadow:var(--shadow);
+    display:flex;flex-direction:column;gap:12px;
+    max-height:90vh;
+  }
+  .modal img{
+    width:100%;
+    border-radius:10px;
+    display:block;
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+  }
+  .modal-scroll{overflow:auto;border-radius:10px;}
+  .modal-hint{
+    font:600 14px/1.4 "Barlow Condensed";
+    color:var(--chalk-dim);
+    text-align:center;
+  }
+  .modal-hint b{color:var(--amber);}
+  .modal-close{
+    align-self:center;
+    border:none;background:none;color:var(--chalk);
+    font:700 14px "Barlow Condensed";
+    letter-spacing:.08em;text-transform:uppercase;
+    padding:8px 16px;cursor:pointer;
+  }
+
+  @media (min-width:420px){
+    .jersey{width:12cqw;height:12cqw;}
+  }
+</style>
+
+<div class="wrap">
+  <div class="header">
+    <div class="crest" id="crest">TT</div>
+    <div class="title-block">
+      <p class="eyebrow">Escale seu time</p>
+      <input id="teamName" placeholder="Nome do seu time" maxlength="26" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="formations" id="formations" role="group" aria-label="Esquema tático"></div>
+
+  <div class="progress-row">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="progress-label" id="progressLabel">0/11 escalados</span>
+  </div>
+
+  <div class="field-wrap" id="fieldWrap">
+    <svg viewBox="0 0 100 145" preserveAspectRatio="none">
+      <rect class="field-lines" x="4" y="4" width="92" height="137"/>
+      <line class="field-lines" x1="4" y1="72.5" x2="96" y2="72.5"/>
+      <circle class="field-lines" cx="50" cy="72.5" r="12"/>
+      <circle class="field-dot" cx="50" cy="72.5" r="0.8"/>
+      <!-- top goal (opponent) -->
+      <rect class="field-lines" x="25" y="4" width="50" height="22"/>
+      <rect class="field-lines" x="38" y="4" width="24" height="8"/>
+      <circle class="field-dot" cx="50" cy="20" r="0.8"/>
+      <path class="field-lines" d="M 42 26 A 10 10 0 0 0 58 26"/>
+      <rect class="field-lines" x="44" y="2" width="12" height="2"/>
+      <!-- bottom goal (own) -->
+      <rect class="field-lines" x="25" y="119" width="50" height="22"/>
+      <rect class="field-lines" x="38" y="133" width="24" height="8"/>
+      <circle class="field-dot" cx="50" cy="125" r="0.8"/>
+      <path class="field-lines" d="M 42 119 A 10 10 0 0 1 58 119"/>
+      <rect class="field-lines" x="44" y="141" width="12" height="2"/>
+      <!-- corners -->
+      <path class="field-lines" d="M 4 7 A 3 3 0 0 0 7 4"/>
+      <path class="field-lines" d="M 93 4 A 3 3 0 0 0 96 7"/>
+      <path class="field-lines" d="M 96 138 A 3 3 0 0 0 93 141"/>
+      <path class="field-lines" d="M 7 141 A 3 3 0 0 0 4 138"/>
+    </svg>
+    <div id="slots"></div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="resetBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      Nova escalação
+    </button>
+    <button class="btn primary" id="imageBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+      Gerar imagem
+    </button>
+  </div>
+
+  <p class="hint">Toque em cada camisa pra escrever o nome do jogador. Sua escalação fica salva neste navegador.</p>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal">
+    <div class="modal-scroll"><img id="resultImg" alt="Imagem da escalação"></div>
+    <p class="modal-hint">Fica salvo? Não por aqui.<br><b>Toque e segure a imagem</b> (ou clique com o botão direito) para salvar e compartilhar.</p>
+    <button class="modal-close" id="modalClose" type="button">Fechar</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const FORMATIONS = {
+    "4-3-3": [
+      {p:"GOL", x:50, y:94},
+      {p:"LE", x:14, y:78}, {p:"ZAG", x:36, y:82}, {p:"ZAG", x:64, y:82}, {p:"LD", x:86, y:78},
+      {p:"VOL", x:50, y:60},
+      {p:"MEI", x:26, y:44}, {p:"MEI", x:74, y:44},
+      {p:"PE", x:14, y:20}, {p:"ATA", x:50, y:12}, {p:"PD", x:86, y:20}
+    ],
+    "4-4-2": [
+      {p:"GOL", x:50, y:94},
+      {p:"LE", x:14, y:78}, {p:"ZAG", x:36, y:82}, {p:"ZAG", x:64, y:82}, {p:"LD", x:86, y:78},
+      {p:"ME", x:14, y:52}, {p:"MC", x:38, y:56}, {p:"MC", x:62, y:56}, {p:"MD", x:86, y:52},
+      {p:"ATA", x:36, y:16}, {p:"ATA", x:64, y:16}
+    ],
+    "3-5-2": [
+      {p:"GOL", x:50, y:94},
+      {p:"ZAG", x:28, y:82}, {p:"ZAG", x:50, y:86}, {p:"ZAG", x:72, y:82},
+      {p:"ME", x:12, y:54}, {p:"MC", x:33, y:60}, {p:"VOL", x:50, y:64}, {p:"MC", x:67, y:60}, {p:"MD", x:88, y:54},
+      {p:"ATA", x:38, y:18}, {p:"ATA", x:62, y:18}
+    ],
+    "4-2-3-1": [
+      {p:"GOL", x:50, y:94},
+      {p:"LE", x:14, y:78}, {p:"ZAG", x:36, y:82}, {p:"ZAG", x:64, y:82}, {p:"LD", x:86, y:78},
+      {p:"VOL", x:38, y:60}, {p:"VOL", x:62, y:60},
+      {p:"PE", x:14, y:38}, {p:"MEI", x:50, y:34}, {p:"PD", x:86, y:38},
+      {p:"ATA", x:50, y:14}
+    ],
+    "3-4-3": [
+      {p:"GOL", x:50, y:94},
+      {p:"ZAG", x:28, y:82}, {p:"ZAG", x:50, y:86}, {p:"ZAG", x:72, y:82},
+      {p:"ME", x:14, y:54}, {p:"MC", x:36, y:58}, {p:"MC", x:64, y:58}, {p:"MD", x:86, y:54},
+      {p:"PE", x:18, y:20}, {p:"ATA", x:50, y:12}, {p:"PD", x:82, y:20}
+    ]
+  };
+
+  const STORE_KEY = "escale-seu-time:v1";
+  const slotsEl = document.getElementById("slots");
+  const formationsEl = document.getElementById("formations");
+  const teamNameEl = document.getElementById("teamName");
+  const crestEl = document.getElementById("crest");
+  const progressFill = document.getElementById("progressFill");
+  const progressLabel = document.getElementById("progressLabel");
+
+  let state = loadState();
+
+  function loadState(){
+    let s = null;
+    try{ s = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); }catch(e){}
+    if(!s || typeof s !== "object") s = {};
+    if(!FORMATIONS[s.formation]) s.formation = "4-3-3";
+    if(!s.names || typeof s.names !== "object") s.names = {};
+    if(typeof s.teamName !== "string") s.teamName = "";
+    return s;
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  function nameKey(formation, i){ return formation + ":" + i; }
+
+  function updateCrest(){
+    const words = state.teamName.trim().split(/\s+/).filter(Boolean);
+    let initials = "TT";
+    if(words.length === 1) initials = words[0].slice(0,2).toUpperCase();
+    else if(words.length > 1) initials = (words[0][0] + words[1][0]).toUpperCase();
+    crestEl.textContent = initials;
+  }
+
+  function updateProgress(){
+    const slots = FORMATIONS[state.formation];
+    let filled = 0;
+    slots.forEach((_, i) => { if((state.names[nameKey(state.formation,i)] || "").trim()) filled++; });
+    progressFill.style.width = (filled/slots.length*100) + "%";
+    progressLabel.textContent = filled + "/" + slots.length + " escalados";
+  }
+
+  function renderFormationPills(){
+    formationsEl.innerHTML = "";
+    Object.keys(FORMATIONS).forEach(key => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "f-pill";
+      btn.textContent = key;
+      btn.setAttribute("aria-pressed", key === state.formation ? "true" : "false");
+      btn.addEventListener("click", () => {
+        state.formation = key;
+        saveState();
+        renderFormationPills();
+        renderSlots();
+      });
+      formationsEl.appendChild(btn);
+    });
+  }
+
+  function renderSlots(){
+    slotsEl.innerHTML = "";
+    const slots = FORMATIONS[state.formation];
+    slots.forEach((slot, i) => {
+      const key = nameKey(state.formation, i);
+      const wrap = document.createElement("div");
+      wrap.className = "slot";
+      wrap.style.left = slot.x + "%";
+      wrap.style.top = slot.y + "%";
+
+      const jersey = document.createElement("div");
+      jersey.className = "jersey";
+      jersey.innerHTML = "<span>" + slot.p + "</span>";
+
+      const input = document.createElement("input");
+      input.className = "name-tape";
+      input.placeholder = "Nome";
+      input.maxLength = 16;
+      input.autocomplete = "off";
+      input.value = state.names[key] || "";
+      input.addEventListener("input", () => {
+        state.names[key] = input.value;
+        saveState();
+        updateProgress();
+      });
+
+      wrap.appendChild(jersey);
+      wrap.appendChild(input);
+      slotsEl.appendChild(wrap);
+    });
+    updateProgress();
+  }
+
+  teamNameEl.value = state.teamName;
+  teamNameEl.addEventListener("input", () => {
+    state.teamName = teamNameEl.value;
+    saveState();
+    updateCrest();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    const slots = FORMATIONS[state.formation];
+    slots.forEach((_, i) => { delete state.names[nameKey(state.formation, i)]; });
+    saveState();
+    renderSlots();
+  });
+
+  updateCrest();
+  renderFormationPills();
+  renderSlots();
+
+  /* ---------------- image export ---------------- */
+
+  const modalBackdrop = document.getElementById("modalBackdrop");
+  const resultImg = document.getElementById("resultImg");
+  document.getElementById("modalClose").addEventListener("click", () => { modalBackdrop.hidden = true; });
+  modalBackdrop.addEventListener("click", (e) => { if(e.target === modalBackdrop) modalBackdrop.hidden = true; });
+
+  async function buildImage(){
+    const scale = 9; // px per field-unit (viewBox is 100 wide)
+    const fieldW = 100 * scale;
+    const fieldH = 145 * scale;
+    const headerH = Math.round(fieldW * 0.34);
+    const footerH = Math.round(fieldW * 0.13);
+    const W = fieldW;
+    const H = headerH + fieldH + footerH;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext("2d");
+
+    try{
+      await Promise.all([
+        document.fonts.load('800 ' + Math.round(fieldW*0.09) + 'px "Permanent Marker"'),
+        document.fonts.load('800 40px "Barlow Condensed"'),
+        document.fonts.load('700 40px "Barlow Condensed"')
+      ]);
+    }catch(e){}
+
+    // background board
+    const bg = ctx.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0, "#1f4a34");
+    bg.addColorStop(1, "#0d2318");
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // header: crest + team name + formation
+    const teamName = (state.teamName || "Meu Time").trim() || "Meu Time";
+    const words = teamName.split(/\s+/).filter(Boolean);
+    let initials = "TT";
+    if(words.length === 1) initials = words[0].slice(0,2).toUpperCase();
+    else if(words.length > 1) initials = (words[0][0] + words[1][0]).toUpperCase();
+
+    const crestR = headerH * 0.30;
+    const crestCx = W*0.16, crestCy = headerH*0.52;
+    ctx.save();
+    ctx.translate(crestCx, crestCy);
+    ctx.rotate(-4 * Math.PI/180);
+    const crestGrad = ctx.createLinearGradient(-crestR,-crestR,crestR,crestR);
+    crestGrad.addColorStop(0, "#ffb703");
+    crestGrad.addColorStop(1, "#ff8f1f");
+    ctx.fillStyle = crestGrad;
+    ctx.beginPath();
+    ctx.arc(0,0,crestR,0,Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "#3a2600";
+    ctx.font = "800 " + Math.round(crestR*0.8) + 'px "Barlow Condensed"';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(initials, 0, crestR*0.05);
+    ctx.restore();
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ffb703";
+    ctx.font = "700 " + Math.round(headerH*0.09) + 'px "Barlow Condensed"';
+    ctx.fillText("ESCALE SEU TIME", W*0.16 + crestR + 18, headerH*0.30);
+
+    ctx.fillStyle = "#f4f1e6";
+    ctx.font = "800 " + Math.round(headerH*0.20) + 'px "Permanent Marker"';
+    let displayName = teamName;
+    ctx.font = "800 " + Math.round(headerH*0.20) + 'px "Permanent Marker"';
+    while(ctx.measureText(displayName).width > W - (W*0.16 + crestR + 18) - 20 && displayName.length > 3){
+      displayName = displayName.slice(0, -1);
+    }
+    ctx.fillText(displayName, W*0.16 + crestR + 18, headerH*0.62);
+
+    ctx.fillStyle = "rgba(244,241,230,.7)";
+    ctx.font = "700 " + Math.round(headerH*0.09) + 'px "Barlow Condensed"';
+    ctx.fillText("Esquema " + state.formation, W*0.16 + crestR + 18, headerH*0.84);
+
+    // pitch
+    ctx.save();
+    ctx.translate(0, headerH);
+    for(let i=0;i<15;i++){
+      ctx.fillStyle = i % 2 === 0 ? "#1f5138" : "#1a4630";
+      ctx.fillRect(0, i*(fieldH/15), fieldW, fieldH/15 + 1);
+    }
+    ctx.strokeStyle = "rgba(244,241,230,.55)";
+    ctx.lineWidth = Math.max(1, scale*0.09);
+    ctx.fillStyle = "rgba(244,241,230,.55)";
+
+    function S(v){ return v*scale; }
+    function rect(x,y,w,h){ ctx.strokeRect(S(x),S(y),S(w),S(h)); }
+    function line(x1,y1,x2,y2){ ctx.beginPath(); ctx.moveTo(S(x1),S(y1)); ctx.lineTo(S(x2),S(y2)); ctx.stroke(); }
+    function circle(cx,cy,r){ ctx.beginPath(); ctx.arc(S(cx),S(cy),S(r),0,Math.PI*2); ctx.stroke(); }
+    function dot(cx,cy,r){ ctx.beginPath(); ctx.arc(S(cx),S(cy),S(r),0,Math.PI*2); ctx.fill(); }
+    function arc(cx,cy,r,a0,a1){ ctx.beginPath(); ctx.arc(S(cx),S(cy),S(r),a0,a1); ctx.stroke(); }
+
+    rect(4,4,92,137);
+    line(4,72.5,96,72.5);
+    circle(50,72.5,12);
+    dot(50,72.5,0.8);
+
+    rect(25,4,50,22);
+    rect(38,4,24,8);
+    dot(50,20,0.8);
+    arc(50,20,10, 0.7297, 2.4119); // bottom half bulge toward field
+
+    rect(25,119,50,22);
+    rect(38,133,24,8);
+    dot(50,125,0.8);
+    arc(50,125,10, 3.8715, 5.5537);
+
+    ctx.restore();
+
+    // slots
+    const slots = FORMATIONS[state.formation];
+    ctx.textAlign = "center";
+    slots.forEach((slot, i) => {
+      const key = state.formation + ":" + i;
+      const name = (state.names[key] || "").trim();
+      const cx = slot.x * scale;
+      const cy = headerH + slot.y * scale;
+      const r = scale * 6.2;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy+scale*0.25, r, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(0,0,0,.35)";
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      ctx.fillStyle = "#ffb703";
+      ctx.fill();
+      ctx.lineWidth = scale*0.22;
+      ctx.strokeStyle = "#0d2016";
+      ctx.stroke();
+
+      ctx.fillStyle = "#3a2600";
+      ctx.font = "800 " + Math.round(r*0.74) + 'px "Barlow Condensed"';
+      ctx.textBaseline = "middle";
+      ctx.fillText(slot.p, cx, cy + r*0.06);
+
+      const tapeW = scale*20, tapeH = scale*7.4;
+      const tapeY = cy + r + scale*3.6;
+      ctx.save();
+      ctx.translate(cx, tapeY);
+      ctx.rotate(-1.1 * Math.PI/180);
+      ctx.fillStyle = "#f4f1e6";
+      ctx.beginPath();
+      const rr = scale*0.6;
+      ctx.moveTo(-tapeW/2+rr, -tapeH/2);
+      ctx.arcTo(tapeW/2, -tapeH/2, tapeW/2, tapeH/2, rr);
+      ctx.arcTo(tapeW/2, tapeH/2, -tapeW/2, tapeH/2, rr);
+      ctx.arcTo(-tapeW/2, tapeH/2, -tapeW/2, -tapeH/2, rr);
+      ctx.arcTo(-tapeW/2, -tapeH/2, tapeW/2, -tapeH/2, rr);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = name ? "#0d2016" : "#8a8577";
+      ctx.font = "700 " + Math.round(tapeH*0.5) + 'px "Barlow Condensed"';
+      ctx.textBaseline = "middle";
+      let label = (name || "a escalar").toUpperCase();
+      while(ctx.measureText(label).width > tapeW - scale*2 && label.length > 3){
+        label = label.slice(0,-1);
+      }
+      ctx.fillText(label, 0, tapeH*0.06);
+      ctx.restore();
+    });
+
+    // footer
+    const filled = slots.filter((_,i) => (state.names[state.formation+":"+i]||"").trim()).length;
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(244,241,230,.7)";
+    ctx.font = "700 " + Math.round(footerH*0.34) + 'px "Barlow Condensed"';
+    ctx.fillText(filled + "/" + slots.length + " jogadores escalados", W/2, headerH + fieldH + footerH*0.62);
+
+    return canvas.toDataURL("image/png");
+  }
+
+  document.getElementById("imageBtn").addEventListener("click", async () => {
+    const dataUrl = await buildImage();
+    resultImg.src = dataUrl;
+    modalBackdrop.hidden = false;
+  });
+
+})();
+</script>

@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --color-board: #173829;
+  --color-board-dark: #0d2318;
+  --color-chalk: #f4f1e6;
+  --color-chalk-dim: rgb(244 241 230 / 0.62);
+  --color-line: rgb(244 241 230 / 0.55);
+  --color-amber: #DB4108;
+  --color-amber-ink: #ffffff;
+  --color-ink: #0d2016;
+  --color-pitch-a: #1f5138;
+  --color-pitch-b: #1a4630;
+  --font-cond: "Barlow Condensed", ui-sans-serif, system-ui, sans-serif;
+  --font-marker: "Permanent Marker", cursive;
+  --shadow-card: 0 10px 30px -12px rgb(0 0 0 / 0.55);
+}
+
+body {
+  margin: 0;
+  color: var(--color-chalk);
+  font-family: var(--font-cond);
+  color-scheme: dark;
+  background: radial-gradient(1100px 700px at 50% -10%, #1f4a34 0%, var(--color-board) 55%, var(--color-board-dark) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pitch-stripes {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-pitch-a) 0 9.6667%,
+    var(--color-pitch-b) 9.6667% 19.3334%
+  );
+}
+.field-lines {
+  fill: none;
+  stroke: var(--color-line);
+  stroke-width: 0.5;
+  vector-effect: non-scaling-stroke;
+}
+.field-dot { fill: var(--color-line); }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* iOS / touch polish */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+button, label, img {
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+button { -webkit-user-select: none; user-select: none; }
+input { font-size: max(16px, 1em); } /* iOS zooms the page on focus below 16px */

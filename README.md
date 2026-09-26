@@ -11,6 +11,8 @@ Mobile-first PWA (React + Vite + Tailwind v4) to build a football lineup: pick t
 ## Data
 Players come from Neon Postgres through `database.ts` (`fetchPlayers`), exposed as `GET /api/players`
 (Vite dev middleware in `vite.config.ts`; Vercel function in `api/players.ts`).
+The project is `"type": "module"`, so relative imports inside `api/` must use the `.js` extension
+(e.g. `../database.js`) or the Vercel function fails with `FUNCTION_INVOCATION_FAILED`. Set `DATABASE_URL` in Vercel env vars.
 Copy `.env.example` to `.env` and set `DATABASE_URL`.
 
 ## Scripts

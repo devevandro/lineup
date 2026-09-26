@@ -1,4 +1,4 @@
-import { fetchPlayers } from "../database";
+import { fetchPlayers } from "../database.js";
 
 export async function GET() {
   try {

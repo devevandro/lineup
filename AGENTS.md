@@ -12,6 +12,7 @@ React 19 + Vite + Tailwind CSS v4 (`@theme` tokens in `src/index.css`), TypeScri
 
 ## Conventions
 - Mobile only; UI text in Portuguese.
+- In `api/*.ts`, import local modules with a `.js` extension (`../database.js`); extensionless ESM imports crash on Vercel.
 - Never expose `DATABASE_URL` to the client; use `/api/players`.
 - Main color `#DB4108` (`--color-amber` token), white text on it.
 - Player photos are transparent PNG cutouts: no circle behind them on the pitch or in the exported image.

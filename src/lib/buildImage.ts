@@ -5,14 +5,15 @@ import { pickKey, type LineupState } from "./state";
 
 import { TEAM_SYMBOL } from "./symbol";
 
-function loadImage(src: string): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = src;
-  });
+async function loadImage(src: string): Promise<ImageBitmap | null> {
+  try {
+    // fetch bypasses a cached non-CORS copy (from a plain <img>) that would taint/fail the canvas
+    const res = await fetch(src, { mode: "cors", cache: "no-cache" });
+    if (!res.ok) return null;
+    return await createImageBitmap(await res.blob());
+  } catch {
+    return null;
+  }
 }
 
 function wrapNames(ctx: CanvasRenderingContext2D, names: string[], maxW: number) {
@@ -49,15 +50,13 @@ export async function buildImage(state: LineupState, playersById: Map<string, Pl
   const symbol = await loadImage(TEAM_SYMBOL);
   const photos = await Promise.all(starters.map((p) => (p?.image ? loadImage(p.image) : Promise.resolve(null))));
 
-  // footer: names of the starters (and the bench, when the lineup is closed)
+  // footer: bench names (only when the lineup is closed)
   const nameFont = 34;
   const lineH = nameFont * 1.35;
   const measure = document.createElement("canvas").getContext("2d")!;
   measure.font = `700 ${nameFont}px "Barlow Condensed"`;
-  const starterLines = wrapNames(measure, starters.filter((p): p is PlayerRow => !!p).map((p) => displayName(p).toUpperCase()), W - 80);
   const benchLines = wrapNames(measure, bench.map((p) => displayName(p).toUpperCase()), W - 80);
-  const footerLines = 1 + starterLines.length + (benchLines.length ? 1 + benchLines.length : 0);
-  const footerH = Math.round(footerLines * lineH + 60);
+  const footerH = benchLines.length ? Math.round((1 + benchLines.length) * lineH + 60) : 0;
   const H = headerH + fieldH + footerH;
 
   const canvas = document.createElement("canvas");
@@ -230,7 +229,6 @@ export async function buildImage(state: LineupState, playersById: Map<string, Pl
       y += lineH;
     }
   };
-  section("TITULARES", starterLines);
   if (benchLines.length) section("RESERVAS", benchLines);
 
   return canvas.toDataURL("image/png");

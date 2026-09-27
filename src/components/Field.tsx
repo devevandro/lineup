@@ -45,7 +45,7 @@ export default function Field({ formation, picks, playersById, onSlotClick }: Pr
             style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
           >
             {player?.image ? (
-              <img src={player.image} alt="" className="h-[17cqw] w-[13cqw] select-none object-contain drop-shadow-[0_3px_4px_rgb(0_0_0/.45)]" />
+              <img src={player.image} crossOrigin="anonymous" alt="" className="h-[17cqw] w-[13cqw] select-none object-contain drop-shadow-[0_3px_4px_rgb(0_0_0/.45)]" />
             ) : (
               <span className="size-[12cqw] min-w-[30px] min-h-[30px] rounded-full bg-amber border-2 border-ink flex items-center justify-center text-amber-ink font-extrabold select-none shadow-[0_2px_0_rgb(0_0_0/.35),inset_0_-3px_0_rgb(0_0_0/.15)]">
                 <span className="text-[clamp(10px,4.6cqw,15px)] leading-none">{slot.p}</span>

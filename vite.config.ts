@@ -64,8 +64,8 @@ export default defineConfig({
             urlPattern: ({ url }) => url.hostname.endsWith(".public.blob.vercel-storage.com"),
             handler: "CacheFirst",
             options: {
-              cacheName: "player-photos",
-              cacheableResponse: { statuses: [0, 200] },
+              cacheName: "player-photos-v2",
+              cacheableResponse: { statuses: [200] },
               expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },

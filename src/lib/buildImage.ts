@@ -5,15 +5,21 @@ import { pickKey, type LineupState } from "./state";
 
 import { TEAM_SYMBOL } from "./symbol";
 
-async function loadImage(src: string): Promise<ImageBitmap | null> {
+async function fetchBitmap(src: string): Promise<ImageBitmap | null> {
   try {
-    // fetch bypasses a cached non-CORS copy (from a plain <img>) that would taint/fail the canvas
     const res = await fetch(src, { mode: "cors", cache: "no-cache" });
     if (!res.ok) return null;
     return await createImageBitmap(await res.blob());
   } catch {
     return null;
   }
+}
+
+async function loadImage(src: string): Promise<ImageBitmap | null> {
+  // a cached opaque (no-cors) copy from a plain <img> makes the first fetch fail; retry with a distinct URL
+  const first = await fetchBitmap(src);
+  if (first) return first;
+  return fetchBitmap(`${src}${src.includes("?") ? "&" : "?"}export=1`);
 }
 
 function wrapNames(ctx: CanvasRenderingContext2D, names: string[], maxW: number) {

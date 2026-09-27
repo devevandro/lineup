@@ -6,7 +6,7 @@ Mobile-first PWA (React + Vite + Tailwind v4) to build a football lineup: pick t
 1. **Squad** – set the team name and select players (photo + nickname + checkbox), then "Fechar time".
 2. **Lineup** – choose a formation, tap a jersey to pick a player, "Fechar escalação" once 11 are placed; the rest go to the bench.
 3. **Bench** – "Ver reservas" lists reserves; "Substituir" swaps a reserve with a starter.
-4. **Export** – "Gerar imagem" renders a PNG (team symbol, formation, player cutouts, reserves names in the footer only). Photos are fetched via `fetch` (avoids cached non-CORS copies). The result modal has a "Baixar imagem" button (Web Share on iOS, download elsewhere).
+4. **Export** – "Gerar imagem" renders a PNG (team symbol, formation, player cutouts, reserves names in the footer only). Photos are fetched via `fetch` (retrying with `?export=1` if a cached opaque copy breaks the first attempt); photo `<img>`s use `crossOrigin="anonymous"` and the service worker only caches 200 responses (`player-photos-v2`). The result modal has a "Baixar imagem" button (Web Share on iOS, download elsewhere).
 
 ## Data
 Players come from Neon Postgres through `database.ts` (`fetchPlayers`), exposed as `GET /api/players`

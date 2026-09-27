@@ -16,6 +16,6 @@ React 19 + Vite + Tailwind CSS v4 (`@theme` tokens in `src/index.css`), TypeScri
 - Never expose `DATABASE_URL` to the client; use `/api/players`.
 - Main color `#DB4108` (`--color-amber` token), white text on it.
 - Player photos are transparent PNG cutouts: no circle behind them on the pitch or in the exported image.
-- Export footer lists only the bench (no starters); load photos with `fetch` + `createImageBitmap`; saving uses a button (Web Share / download), not long-press.
+- Export footer lists only the bench (no starters); load photos with `fetch` + `createImageBitmap`; photo `<img>`s need `crossOrigin="anonymous"` and the SW photo cache must not store opaque (status 0) responses, or the export falls back to the circle; saving uses a button (Web Share / download), not long-press.
 - Canvas export must stay visually consistent with `Field`; slot `y` is a percentage of field height.
 - Changing the team symbol: replace `public/simble.webp` and regenerate PWA icons/splash.
